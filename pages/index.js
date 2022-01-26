@@ -1,5 +1,7 @@
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
 import appConfig from '../config.json';
+import React from 'react';
+import { useRouter } from 'next/router';
 
 function GlobalStyle() {
   return (
@@ -37,7 +39,7 @@ function Titulo(props) {
       <Tag>{props.children}</Tag>
       <style jsx>{`
             ${Tag} {
-                color: ${appConfig.theme.colors.neutrals['000']};
+                color: ${appConfig.theme.colors.neutrals['900']};
                 font-size: 24px;
                 font-weight: 600;
             }
@@ -46,30 +48,17 @@ function Titulo(props) {
   );
 }
 
-// Componente React
-// function HomePage() {
-//     // JSX
-//     return (
-//         <div>
-//             <GlobalStyle />
-//             <Titulo tag="h2">Boas vindas de volta!</Titulo>
-//             <h2>Discord - Alura Matrix</h2>
-//         </div>
-//     )
-// }
-// export default HomePage
-
 export default function PaginaInicial() {
-  const username = 'andreattamatheus';
-
+  const [username, setUsername] = React.useState('andreattamatheus');
+  const router = useRouter();
   return (
     <>
       <GlobalStyle />
       <Box
         styleSheet={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: appConfig.theme.colors.primary[500],
-          backgroundImage: 'url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)',
+          backgroundColor: appConfig.theme.colors.primary[parseInt("000")],
+          backgroundImage: 'url(https://virtualbackgrounds.site/wp-content/uploads/2020/07/banana-taped-to-a-wall.jpg)',
           backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
         }}
       >
@@ -85,12 +74,15 @@ export default function PaginaInicial() {
             width: '100%', maxWidth: '700px',
             borderRadius: '5px', padding: '32px', margin: '16px',
             boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
-            backgroundColor: appConfig.theme.colors.neutrals[700],
+            backgroundColor: appConfig.theme.colors.neutrals[parseInt("000")],
           }}
         >
           {/* Formulário */}
           <Box
             as="form"
+            onSubmit={function handler(e){
+              e.preventDefault();
+            }}
             styleSheet={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
@@ -102,6 +94,12 @@ export default function PaginaInicial() {
             </Text>
 
             <TextField
+              value={username}
+              onChange={function (e){
+                  const inputUsername = e.target.value;
+                  setUsername(inputUsername)
+                }
+              }
               fullWidth
               textFieldColors={{
                 neutral: {
@@ -115,6 +113,10 @@ export default function PaginaInicial() {
             <Button
               type='submit'
               label='Entrar'
+              onClick={function (e){
+                e.preventDefault();
+                router.push('/chat');
+              }}
               fullWidth
               buttonColors={{
                 contrastColor: appConfig.theme.colors.neutrals["000"],
@@ -135,8 +137,7 @@ export default function PaginaInicial() {
               alignItems: 'center',
               maxWidth: '200px',
               padding: '16px',
-              backgroundColor: appConfig.theme.colors.neutrals[800],
-              border: '1px solid',
+              backgroundColor: appConfig.theme.colors.neutrals[parseInt("000")],
               borderColor: appConfig.theme.colors.neutrals[999],
               borderRadius: '10px',
               flex: 1,
@@ -148,7 +149,7 @@ export default function PaginaInicial() {
                 borderRadius: '50%',
                 marginBottom: '16px',
               }}
-              src={`https://github.com/${username}.png`}
+              src={`https://github.com/${username.length > 2 ? username : ''}.png`}
             />
             <Text
               variant="body4"
