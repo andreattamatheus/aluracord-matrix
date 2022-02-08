@@ -115,7 +115,7 @@ export default function PaginaInicial() {
               label='Entrar'
               onClick={function (e){
                 e.preventDefault();
-                router.push('/chat');
+                router.push(`/chat?username=${username}`);
               }}
               fullWidth
               buttonColors={{

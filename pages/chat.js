@@ -1,42 +1,64 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
+import { useRouter } from 'next/router';
 import appConfig from '../config.json';
 import { createClient } from '@supabase/supabase-js';
+import { ButtonSendSticker } from '../src/components/ButtonSendSticker';
 
 export default function ChatPage() {
     const [mensagem, setMensagem] = React.useState('');
     var [listaDeMensagens, setListaDeMensagem ] = React.useState([]);
     const _supabase = createClient("https://iddtqnafdzcwcccksxsa.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0Mzg1Nzk0MSwiZXhwIjoxOTU5NDMzOTQxfQ.U8ZQWilSHuAhnbwRFha7yaS4pk-anVGQC3VWbvFdpHg");
+    const roteamento = useRouter();
 
-    const mensagens = _supabase
+    // {
+    //     de: roteamento.username,
+    //     texto: ':sticker: URL_IMAGEM'
+    // }
+
+    function escutaMensagemEmTempoReal(adicionaMensagem){
+        return _supabase
         .from('mensagens')
-        .select('*')
-        .then((dados) => {
-            console.log('Supabase Instance: ', dados)
+        .on('*', (response) => {
+            adicionaMensagem(response.new)
         })
-    
+        .subscribe();
+    }
+
+    React.useEffect(() => {
+        const mensagens = _supabase
+            .from('mensagens')
+            .select('*')
+            .order('id', { ascending: false})
+            .then(({ data }) => {
+                setListaDeMensagem(data)
+            });
+
+        escutaMensagemEmTempoReal((novaMensagem) => {
+            setListaDeMensagem((valorAtualDaLista) => {
+                return [
+                    novaMensagem,
+                    ...valorAtualDaLista
+                ]
+            });
+        }) 
+
+    }, []);
 
     function handleNovaMensagem(novaMensagem){
         const mensagem = {
-            id: listaDeMensagens.length,
+            // id: listaDeMensagens.length,
             texto: novaMensagem,
-            de: 'andreattamatheus'
+            de: roteamento.username
         };
 
         const inserirMensagem = _supabase
             .from('mensagens')
             .insert([
-                {
-                    texto: novaMensagem,
-                    de: 'andreattamatheus'
-                }
+                mensagem
             ])
-        // console.log(inserirMensagem);
-        setListaDeMensagem([
-            mensagem,
-            ...listaDeMensagens
-        ]);
-
+            .then(( {data} ) => {
+            });
         setMensagem('');
     }
     function handleRemoverMensagem(messagesRemoves){
@@ -53,7 +75,8 @@ export default function ChatPage() {
                 backgroundColor: appConfig.theme.colors.primary[500],
                 backgroundImage: `url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)`,
                 backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
-                color: appConfig.theme.colors.neutrals['000']
+                color: appConfig.theme.colors.neutrals['000'],
+                height: '800px'
             }}
         >
             <Box
@@ -119,6 +142,11 @@ export default function ChatPage() {
                                 color: appConfig.theme.colors.neutrals[200],
                             }}
                         />
+                        <ButtonSendSticker 
+                            onStickerClick={(sticker) => {
+                                handleNovaMensagem(':sticker:' + sticker);
+                            }}    
+                        />
                     </Box>
                 </Box>
             </Box>
@@ -158,10 +186,11 @@ function MessageList(props) {
             <Box
                 tag="ul"
                 styleSheet={{
-                    overflow: 'scroll',
+                    overflowY: 'scroll',
                     display: 'flex',
                     flexDirection: 'column-reverse',
                     flex: 1,
+                    paddingLeft: '5px',
                     color: appConfig.theme.colors.neutrals["000"],
                     marginBottom: '16px',
                 }}
@@ -175,6 +204,7 @@ function MessageList(props) {
                                     borderRadius: '5px',
                                     padding: '6px',
                                     marginBottom: '12px',
+                                    listStyleType: 'none',
                                     hover: {
                                         backgroundColor: appConfig.theme.colors.neutrals[700],
                                     }
@@ -193,7 +223,7 @@ function MessageList(props) {
                                             display: 'inline-block',
                                             marginRight: '8px',
                                         }}
-                                        src={`https://github.com/andreattamatheus.png`}
+                                        src={`https://github.com/${mensagem.de}.png`}
                                     />
                                     <Text tag="strong">
                                         {mensagem.de}
@@ -232,7 +262,14 @@ function MessageList(props) {
                                         X
                                     </Text>
                                 </Box>
-                                {mensagem.texto}
+                                {mensagem.texto.startsWith(':sticker:')
+                                    ? (
+                                        <Image src={mensagem.texto.replace(':sticker:', '')}/>
+                                    )
+                                    : (
+                                        mensagem.texto
+                                    )
+                                }
                             </Text>
                         );
                     })
