@@ -10,6 +10,7 @@ export default function ChatPage() {
     var [listaDeMensagens, setListaDeMensagem ] = React.useState([]);
     const _supabase = createClient("https://iddtqnafdzcwcccksxsa.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0Mzg1Nzk0MSwiZXhwIjoxOTU5NDMzOTQxfQ.U8ZQWilSHuAhnbwRFha7yaS4pk-anVGQC3VWbvFdpHg");
     const roteamento = useRouter();
+    const usuarioLogado = roteamento.query.username;
 
     // {
     //     de: roteamento.username,
@@ -49,7 +50,7 @@ export default function ChatPage() {
         const mensagem = {
             // id: listaDeMensagens.length,
             texto: novaMensagem,
-            de: roteamento.username
+            de: usuarioLogado
         };
 
         const inserirMensagem = _supabase
